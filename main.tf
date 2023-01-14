@@ -505,7 +505,7 @@ data "aws_security_groups" "linux" {
 
   filter {
     name   = "tag:Platform"
-    values = ["nix"] # the tag should be replaced with "lnx"
+    values = ["lnx"] # replaced old "unx" tag
   }
 
   filter {
