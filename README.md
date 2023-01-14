@@ -10,8 +10,9 @@ Terraform module for creating AWS EC2 instances. This module is designed to prov
 
 The module supports the creation of instances of two types `Linux` and `Windows`. 
 
-### Module Usage
-To use the module you need to add the following module definition block in the root module. This is a short example of a module definition, more detailed information about the parameters passed to the module is described in the module [Inputs]() section.
+<h3 id="usage">Module Usage</h3>
+
+To use the module you need to add the following module definition block in the root module. This is a short example of a module definition, more detailed information about the parameters passed to the module is described in the module [Inputs](#inputs) section.
 
 ```hcl
 /*
@@ -51,10 +52,12 @@ module "ec2-instances" {
 }
 ```
 
-### Inputs
+<h3 id="inputs">Inputs</h3>
+
 | Name | Description | Type | Default |
 |------|-------------|:------:|:---------:|
 
-### Outputs
+<h3 id="outputs">Outputs</h3>
+
 | Name | Description |
 |------|-------------|
