@@ -54,28 +54,28 @@ module "ec2-instances" {
 
 <h3 id="inputs">Inputs</h3>
 
-| Name | Description | Type | Default |
-|------|-------------|:------:|---------|
-| all\_tags | (Optional) User defined map of tags to add to all resources | `map(string)` | `{}` |
-| domain | (Optional) User defined objects tree | `string` | `""` |
-| vpc\_name | (Required) VPC name | `string` ||
-| enable\_ipv6 | (Required) Enable IPv6 support | `bool` | `false` |
-| ssh\_key\_pair\_name | (Required) AWS SSH key pair name (for Linux instances) | `string` ||
-| instances\_distribution  | (Required) Instances distribution method. Specifies how the instances are allocated relative to the subnet/AZs. Available options: 'manual' or 'random' | `string` | `"manual"` |
-| ec2\_instance_type | (Required) AWS EC2 Instance Type | `string` | `"t2.micro"` |
-| ec2\_os\_family\_default | (Required) EC2 instance OS family. Available options: 'linux' or 'windows' | `string` | `"linux"` |
-| ec2\_config\_parameters\_index | (Required) Index of configuration set | `number` | `0` |
-| ec2\_config\_parameters | (Required) Instances initial parameters. List, each element of which describes the parameters of the created instance(s) | `list(object(any))` ||
-| ec2\_ami\_verify | (Optional) Checking the AMIs specified in the configuration | `bool` | `false` |
-| ec2\_ami\_owners | (Optional) List of AMIs owners required for image verification | `list(string)` | `["amazon",]` |
-| ec2\_inventory\_file | (Optional) Creating inventory file in `Ansible` format | `bool` | `true` |
-| ec2\_os\_names\_map | (Required) OS full names to short names map | `map(string)` | <pre>{<br>&nbsp;&nbsp;ubuntu               = "uls"<br>&nbsp;&nbsp;debian               = "deb"<br>&nbsp;&nbsp;amazon               = "amzn"<br>&nbsp;&nbsp;rhel                 = "rhel"<br>&nbsp;&nbsp;rhel\_ha              = "rhel_ha"<br>&nbsp;&nbsp;suse                 = "sles"<br>&nbsp;&nbsp;windows\_servers\_core = "ws-core"<br>&nbsp;&nbsp;windows\_servers\_full = "ws-full"<br>}</pre> |
-| ami\_selection\_map\_linux\_default | (Required) Describes default parameters for searching and filtering the results of the desired Linux AMI | `map(object(string))` | <pre>{<br>&nbsp;&nbsp;default = {<br>    description = ""<br>&nbsp;&nbsp;&nbsp;&nbsp;name        = "ubuntu"<br>&nbsp;&nbsp;&nbsp;&nbsp;ver         = "22.04"<br>&nbsp;&nbsp;&nbsp;&nbsp;arch        = "amd64"<br>&nbsp;&nbsp;&nbsp;&nbsp;edition     = "minimal"<br>&nbsp;&nbsp;&nbsp;&nbsp;alias       = "jammy"<br>&nbsp;&nbsp;&nbsp;&nbsp;owner       = "099720109477"<br>&nbsp;&nbsp;},<br>}</pre> |
-| ami\_selection\_map\_linux\_main | (Optional) Describes static parameters for searching and filtering the results of the desired Linux AMIs | `map(object(string))` | `{}` |
-| ami\_selection\_map\_linux\_user | (Optional) Describes user defined parameters for searching and filtering the results of the desired Linux AMIs | `map(object(string))` | `{}` |
-| ami\_selection\_map\_windows\_default | (Required) Describes default parameters for searching and filtering the results of the desired Windows AMI | `map(object(string))` | <pre>{<br>&nbsp;&nbsp;default = {<br>&nbsp;&nbsp;&nbsp;&nbsp;name       = "Windows_Server"<br>&nbsp;&nbsp;&nbsp;&nbsp;ver        = "2022"<br>&nbsp;&nbsp;&nbsp;&nbsp;subversion = ""<br>&nbsp;&nbsp;&nbsp;&nbsp;lang       = "English"<br>&nbsp;&nbsp;&nbsp;&nbsp;edition    = "Core"<br>&nbsp;&nbsp;&nbsp;&nbsp;owner      = "801119661308"<br>&nbsp;&nbsp;},<br>}</pre> |
-| ami\_selection\_map\_windows\_main | (Optional) Describes static parameters for searching and filtering the results of the desired Windows AMIs | `map(object(string))` | `{}` |
-| ami\_selection\_map\_windows\_user | (Optional) Describes user defined parameters for searching and filtering the results of the desired Windows AMIs | `map(object(string))` | `{}` |
+| Name | Description | Type |
+|------|-------------|:------:|
+| all\_tags | (Optional) User defined map of tags to add to all resources | `map(string)` |
+| domain | (Optional) User defined objects tree | `string` |
+| vpc\_name | (Required) VPC name | `string` |
+| enable\_ipv6 | (Required) Enable IPv6 support | `bool` |
+| ssh\_key\_pair\_name | (Required) AWS SSH key pair name (for Linux instances) | `string` |
+| instances\_distribution  | (Required) Instances distribution method. Specifies how the instances are allocated relative to the subnet/AZs. Available options: 'manual' or 'random' | `string` |
+| ec2\_instance_type | (Required) AWS EC2 Instance Type | `string` |
+| ec2\_os\_family\_default | (Required) EC2 instance OS family. Available options: 'linux' or 'windows' | `string` |
+| ec2\_config\_parameters\_index | (Required) Index of configuration set | `number` |
+| ec2\_config\_parameters | (Required) Instances initial parameters. List, each element of which describes the parameters of the created instance(s) | `list(object(any))` |
+| ec2\_ami\_verify | (Optional) Checking the AMIs specified in the configuration | `bool` |
+| ec2\_ami\_owners | (Optional) List of AMIs owners required for image verification | `list(string)` |
+| ec2\_inventory\_file | (Optional) Creating inventory file in `Ansible` format | `bool` |
+| ec2\_os\_names\_map | (Required) OS full names to short names map | `map(string)` |
+| ami\_selection\_map\_linux\_default | (Required) Describes default parameters for searching and filtering the results of the desired Linux AMI | `map(object(string))` |
+| ami\_selection\_map\_linux\_main | (Optional) Describes static parameters for searching and filtering the results of the desired Linux AMIs | `map(object(string))` |
+| ami\_selection\_map\_linux\_user | (Optional) Describes user defined parameters for searching and filtering the results of the desired Linux AMIs | `map(object(string))` |
+| ami\_selection\_map\_windows\_default | (Required) Describes default parameters for searching and filtering the results of the desired Windows AMI | `map(object(string))` |
+| ami\_selection\_map\_windows\_main | (Optional) Describes static parameters for searching and filtering the results of the desired Windows AMIs | `map(object(string))` |
+| ami\_selection\_map\_windows\_user | (Optional) Describes user defined parameters for searching and filtering the results of the desired Windows AMIs | `map(object(string))` |
 
 <h3 id="outputs">Outputs</h3>
 
@@ -88,6 +88,7 @@ module "ec2-instances" {
 | ec2\_\_03\_\_inventory | Inventory file ID and filename |
 
 <h3 id="providers">Providers</h3>
+
 | Name | Version |
 |------|-------------|
 | [aws](https://registry.terraform.io/providers/hashicorp/aws) | ~> 4.0 |
