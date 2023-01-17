@@ -17,7 +17,33 @@ To use the module you need to add the module definition block in the root module
 
 The main parameters passed to the module are described in the input variables `ec2_instance_type` (indicates the type of instance being created) and `ec2_config_parameters` (describes the configuration of the instance(s)).
 
-In the root module, you must set a variable (input or local) (type `map()`) that includes parameters for calling the module.
+In the root module, you must set a variable (input or local) (type `map()`) that includes parameters for calling the module. Detailed description of the variable is given below. All sub-parameters not described as `optional` must be specified.
+
+```hcl
+{
+  "instance_type" = list(
+    object(
+      {
+        instance               = optional(string, null),
+        qty                    = number,
+        tier                   = string,
+        type                   = string,
+        azs                    = list(string),
+        encrypted              = optional(bool, false),
+        iops                   = optional(number, 0),
+        volume_size            = optional(number, null),
+        volume_type            = optional(string, "gp2"),
+        stop_protection        = optional(bool, false),
+        termination_protection = optional(bool, false),
+        ami                    = optional(string, null),
+        os                     = optional(string, null),
+        name                   = optional(string, null),
+        distribution           = optional(string, null)
+      }
+    )
+  ),
+}
+```
 
 <h5 id="ec2_parameters">Main variable definition example</h5>
 
@@ -85,7 +111,7 @@ The values of each key are a list of objects that describe the parameters of the
 Selecting an AMI to deploy an instance can be done in three ways:
 
 - according to the default values. The default values are described in the variables `ami_selection_map_linux_default` and `ami_selection_map_windows_default` for each of the supported platforms.
-- based on the specified AMI. The AMI ID must be specified in the `ami` subparameter. In addition to the AMI, the platform/OS subparameter `os` must be specified.
+- based on the specified AMI. The AMI ID must be specified in the `ami` sub-parameter. In addition to the AMI, the platform/OS sub-parameter `os` must be specified.
 - setting the type of OS and distribution. In this case, the choice of AMI for deployment is based on the search parameters specified in the variables `ami_selection_map_linux_main`, `ami_selection_map_windows_main`, `ami_selection_map_linux_user` and `ami_selection_map_windows_user` for each of the supported platforms (see example below).
 
 <h5 id="ami_selection">Example of defining a variable describing search parameters for selecting AMI</h5>
@@ -113,12 +139,30 @@ module "ec2-instances" {
 
 You can use one of the methods or a combination as in the example [above](#ec2_parameters). 
 
-Distribution of instances between AZs/Subnets can be done dynamically or according to a given condition. If the value of the `instances_distribution` variable is set to `"random"` AZ is selected randomly, if the value of the `instances_distribution` parameter is set to `"manual"` (default value) instances are distributed according to the AZs specified in the `azs` subparameter. The number of AZs specified must match the number of instances in the `qty` subparameter.
+Distribution of instances between AZs/Subnets can be done dynamically or according to a given condition. If the value of the `instances_distribution` variable is set to `"random"` AZ is selected randomly, if the value of the `instances_distribution` parameter is set to `"manual"` (default value) instances are distributed according to the AZs specified in the `azs` sub-parameter. The number of AZs specified must match the number of instances in the `qty` sub-parameter.
 
 If the second method is used (AMI is specified in the input parameter), you can verify the image and check its presence in the AWS AMI registry. To use this functionality, the `ec2_ami_verify` variable must be set to `true` (default is `false`). Additionally, the `ec2_ami_owners` parameter can be set to filter image owners in the registry. The default is `["amazon", ]`.
 
-For each instance or multiple instances (`qty` subparameter), you can specify the type (`volume_type` subparameter) and size (subparameter `volume_size`, in GB) of the volume (by default, the AMI parameters from the image description are used), as well as set the encryption (subparameter `encrypted`) flag (by default, false).
+For each instance or multiple instances (`qty` sub-parameter), you can specify the IOPS (sub-parameter `iops`), type (`volume_type` sub-parameter) and size (sub-parameter `volume_size`, in GB) of the volume (by default, the AMI parameters from the image description are used), as well as set the encryption (sub-parameter `encrypted`) flag (by default, false).
 
+Similarly, it is possible to set values for enabling/disabling stop (sub-parameter `stop_protection`) and termination (sub-parameter `termination_protection`) protections for instance(s).
+
+<h5 id="subnets_and_sg">Select subnets and security groups</h5>
+
+The subnet assignment for an instance is based on the AZ name specified in the sub-parameter `azs` or a randomly selected AZ and the `"Tier"` and `"Type"` subnet tags. The `"Tier"` tag indicates the type of subnet "*public*" or "*private*", the `"Type"` tag indicates its functionality. To the "Type" tag can be assigned any value, but this value must match the value of the `type` sub-parameter.
+
+As an example, a subnet with the tags `"Tier"` = "*public*" and `"Type"` = "*main*" indicate a subnet that has access to the public internet via IGW, allows incoming connections according to the Network ACLs and assigned Security Groups.
+
+Security groups are selected and assigned based on the subnet type of the instance (`"Tier"` subnet tag) and the **platform/OS** of the instance specified in the sub-parameter `os` ("*linux*" or "*windows*").
+To all instances are assigned a default security group (allow traffic inside the VPC). Additionally, for each instance in a `public` subnet, a Security Group is assigned for the platform specified in the sub-parameter `os`. For instances on the Linux platform, Security Groups with the `"Platform"` tag and the value "*lnx*" are selected, for the Windows platform with the `"Platform"` tag equal to "*win*".
+
+**Note:** The module **DOES NOT CREATE** subnets and Security Groups, it only selects and assigns according to the received parameters. For the module to work properly, subnets and Security Groups with the specified tags must be created earlier.
+
+<h3 id="inventory">Inventory file</h3>
+
+In addition to the main functionality, the module allows you to create an inventory file in [Ansible](https://www.ansible.com/) INI [format](https://docs.ansible.com/ansible/latest//inventory_guide/intro_inventory.html#inventory-basics-formats-hosts-and-groups). To create inventory files, the `ec2_inventory_file` parameter must be set to `true`.
+
+The output file will be created in the main directory of the root module.
 
 <h3 id="inputs">Inputs</h3>
 
