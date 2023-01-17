@@ -45,7 +45,7 @@ In the root module, you must set a variable (input or local) (type `map()`) that
 }
 ```
 
-<h5 id="ec2_parameters">Main variable definition example</h5>
+<h4 id="ec2_parameters">Main variable definition example</h4>
 
 ```hcl
 locals {
@@ -114,7 +114,7 @@ Selecting an AMI to deploy an instance can be done in three ways:
 - based on the specified AMI. The AMI ID must be specified in the `ami` sub-parameter. In addition to the AMI, the platform/OS sub-parameter `os` must be specified.
 - setting the type of OS and distribution. In this case, the choice of AMI for deployment is based on the search parameters specified in the variables `ami_selection_map_linux_main`, `ami_selection_map_windows_main`, `ami_selection_map_linux_user` and `ami_selection_map_windows_user` for each of the supported platforms (see example below).
 
-<h5 id="ami_selection">Example of defining a variable describing search parameters for selecting AMI</h5>
+<h4 id="ami_selection">Example of defining a variable describing search parameters for selecting AMI</h4>
 
 ```hcl
 /*
@@ -147,7 +147,7 @@ For each instance or multiple instances (`qty` sub-parameter), you can specify t
 
 Similarly, it is possible to set values for enabling/disabling stop (sub-parameter `stop_protection`) and termination (sub-parameter `termination_protection`) protections for instance(s).
 
-<h5 id="subnets_and_sg">Select subnets and security groups</h5>
+<h4 id="subnets_and_sg">Select subnets and security groups</h4>
 
 The subnet assignment for an instance is based on the AZ name specified in the sub-parameter `azs` or a randomly selected AZ and the `"Tier"` and `"Type"` subnet tags. The `"Tier"` tag indicates the type of subnet "*public*" or "*private*", the `"Type"` tag indicates its functionality. To the "Type" tag can be assigned any value, but this value must match the value of the `type` sub-parameter.
 
