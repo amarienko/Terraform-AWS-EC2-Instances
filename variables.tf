@@ -135,7 +135,7 @@ variable "ec2_config_parameters" {
   type = list(
     object(
       {
-        instance               = optional(string, null)
+        instance               = optional(string, null),
         qty                    = number,
         tier                   = string,
         type                   = string,
@@ -148,7 +148,7 @@ variable "ec2_config_parameters" {
         termination_protection = optional(bool, false),
         ami                    = optional(string, null),
         os                     = optional(string, null), # "linux" or "windows", null by default
-        name                   = optional(string, null)
+        name                   = optional(string, null),
         distribution           = optional(string, null)
       }
     )
