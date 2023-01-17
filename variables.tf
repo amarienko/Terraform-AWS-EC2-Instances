@@ -8,7 +8,8 @@ variable "all_tags" {
 variable "domain" {
   description = "Full resources name suffix"
   type        = string
-  nullable    = false
+  nullable    = true
+  default     = ""
 }
 
 variable "vpc_name" {

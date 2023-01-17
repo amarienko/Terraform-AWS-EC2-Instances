@@ -701,7 +701,7 @@ resource "aws_network_interface" "eni" {
         each.key
         }-${
         random_string.confg_id.result
-        }.eni${var.domain
+        }%{if var.domain != null && var.domain != ""}.eni${var.domain}%{endif}
       }"
     },
     var.all_tags
@@ -909,7 +909,7 @@ resource "aws_instance" "ec2" {
         each.key
         }-${
         random_string.confg_id.result
-      }.i${var.domain}"
+      }%{if var.domain != null && var.domain != ""}.i${var.domain}%{endif}"
       Tier     = each.value.tier
       OSFamily = each.value.os
     },
