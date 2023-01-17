@@ -7,12 +7,88 @@
 
 # Terraform AWS EC2 Instances
 Terraform module for creating AWS EC2 instances. This module is designed to provide the ability to create instances of various types, according to the specified parameters.
+The module was developed in order to be able to create instances in a complex way, of various types, with different configuration parameters and the ability to use `for_each` loop when calling the module.
 
 The module supports the creation of instances of two types `Linux` and `Windows`. 
 
 <h3 id="usage">Module Usage</h3>
 
-To use the module you need to add the following module definition block in the root module. This is a short example of a module definition, more detailed information about the parameters passed to the module is described in the module [Inputs](#inputs) section.
+To use the module you need to add the module definition block in the root module. More detailed information about the parameters passed to the module is described below and in the module [Inputs](#inputs) section.
+
+The main parameters passed to the module are described in the input variables `ec2_instance_type` (indicates the type of instance being created) and `ec2_config_parameters` (describes the configuration of the instance(s)).
+
+In the root module, you must set a variable (input or local) (type `map()`) that includes parameters for calling the module.
+
+<h5 id="ec2_parameters">Main variable definition example</h5>
+
+```hcl
+locals {
+  /*
+    Definition of instances parameters
+  */
+  ec2_parameters = {
+    "t2.micro" = [
+      {
+        qty  = 2
+        tier = "public"
+        type = "main"
+        azs  = ["eu-west-1a", "eu-west-1c", ]
+      },
+      {
+        qty         = 1
+        tier        = "private"
+        type        = "nat"
+        azs         = ["eu-west-1b", ]
+        volume_size = 10
+        volume_type = "gp3"
+        ami         = "ami-0fe0b2cf0e1f25c8a"
+        os          = "linux"
+        name        = "amazon"
+      },
+    ],
+    "t3.nano" = [
+      {
+        qty          = 1
+        tier         = "private"
+        type         = "main"
+        azs          = ["eu-west-1a", ]
+        encrypted    = true
+        os           = "linux"
+        distribution = "debian"
+      },
+    ]
+  }
+}
+```
+Calling a module with a `for_each` loop based on the `local.ec2_parameters` local variable above.
+
+```hcl
+/*
+  EC2
+*/
+module "ec2_instances" {
+  for_each = local.ec2_parameters
+  source   = "github.com/amarienko/Terraform-AWS-EC2-Instances"
+
+  instances_distribution = "manual"
+
+  ec2_instance_type           = each.key
+  ec2_config_parameters_index = index(keys(local.ec2_parameters), each.key)
+  ec2_config_parameters       = each.value
+}
+```
+
+Each key is passed to the module as the `ec2_instance_type` module variable, the value of each key as the `ec2_config_parameters` module variable. The module will be called twice. The first time to create three instances of type `t2.micro`, the second time to create an instance of type `t3.nano`.
+
+The values of each key are a list of objects that describe the parameters of the instance(s).
+
+Selecting an AMI to deploy an instance can be done in three ways:
+
+- according to the default values. The default values are described in the variables `ami_selection_map_linux_default` and `ami_selection_map_windows_default` for each of the supported platforms.
+- based on the specified AMI. The AMI ID must be specified in the `ami` subparameter. In addition to the AMI, the platform/OS subparameter `os` must be specified.
+- setting the type of OS and distribution. In this case, the choice of AMI for deployment is based on the search parameters specified in the variables `ami_selection_map_linux_main`, `ami_selection_map_windows_main`, `ami_selection_map_linux_user` and `ami_selection_map_windows_user` for each of the supported platforms (see example below).
+
+<h5 id="ami_selection">Example of defining a variable describing search parameters for selecting AMI</h5>
 
 ```hcl
 /*
@@ -21,25 +97,8 @@ To use the module you need to add the following module definition block in the r
 module "ec2-instances" {
   for_each = local.ec2_parameters
   source   = "github.com/amarienko/Terraform-AWS-EC2-Instances"
-
-  vpc_name               = var.vpc_name
-  enable_ipv6            = var.enable_ipv6
-  instances_distribution = "manual"
-
-  ec2_os_family_default       = "linux"
-  ec2_ami_verify              = true
-  ec2_ami_owners              = ["amazon", ]
-  ec2_inventory_file          = true
-  ec2_instance_type           = each.key
-  ec2_config_parameters_index = index(keys(local.ec2_parameters), each.key)
-  ec2_config_parameters       = each.value
-
-  ssh_key_pair_name = module.ssh-keygen.ssh__01__key_name.key_pair_name
-
-  all_tags = local.all_tags
-
-
   # AMIs selection variables
+
   ami_selection_map_linux_user = {
     amazon = {
       description = "amzn2-ami-kernel-5.10-hvm, Amazon Linux 2 Kernel 5.10 AMI 2.0"
@@ -51,6 +110,15 @@ module "ec2-instances" {
   }
 }
 ```
+
+You can use one of the methods or a combination as in the example [above](#ec2_parameters). 
+
+Distribution of instances between AZs/Subnets can be done dynamically or according to a given condition. If the value of the `instances_distribution` variable is set to `"random"` AZ is selected randomly, if the value of the `instances_distribution` parameter is set to `"manual"` (default value) instances are distributed according to the AZs specified in the `azs` subparameter. The number of AZs specified must match the number of instances in the `qty` subparameter.
+
+If the second method is used (AMI is specified in the input parameter), you can verify the image and check its presence in the AWS AMI registry. To use this functionality, the `ec2_ami_verify` variable must be set to `true` (default is `false`). Additionally, the `ec2_ami_owners` parameter can be set to filter image owners in the registry. The default is `["amazon", ]`.
+
+For each instance or multiple instances (`qty` subparameter), you can specify the type (`volume_type` subparameter) and size (subparameter `volume_size`, in GB) of the volume (by default, the AMI parameters from the image description are used), as well as set the encryption (subparameter `encrypted`) flag (by default, false).
+
 
 <h3 id="inputs">Inputs</h3>
 
